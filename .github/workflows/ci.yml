@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  schedule:
+    - cron:  '0 0 * * 1'
+  push:
+    branches:
+    - action
+    tags:
+    - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build
+        uses: countstarlight/arch-makepkg-action@master
+        with:
+          #repos: >
+          #  archlinuxcn=https://geo-mirror.chaotic.cx/$repo/$arch
+          #before: "sudo pacman -S --noconfirm archlinux-keyring chaotic-keyring chaotic-mirrorlist"
+          # packages: >
+          #   coreutils
+          #   curl
+          scripts: "./build.sh"
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: coreutils-static-v*.tar.xz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
