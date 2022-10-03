@@ -9,6 +9,7 @@ coreutils_version="latest"
 musl_version="latest"
 
 platform="$(uname -s)"
+platform_arch="$(uname -m)"
 
 [ "$coreutils_version" == "latest" ] && \
   coreutils_version="$(curl -s https://ftp.gnu.org/gnu/coreutils/|tac|\
@@ -97,7 +98,7 @@ if [[ "$WITH_UPX" == 1 && -x "$(which upx 2>/dev/null)" ]]
 fi
 
 echo "= create release tar.xz"
-tar --xz -acf coreutils-static-v${coreutils_version}.tar.xz release
+tar --xz -acf coreutils-static-v${coreutils_version}-${platform_arch}.tar.xz release
 
 if [ "$NO_CLEANUP" != 1 ]
     then
