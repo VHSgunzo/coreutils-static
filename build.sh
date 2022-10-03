@@ -85,7 +85,7 @@ cp build/coreutils-${coreutils_version}/src/!(*.*) release 2>/dev/null
 echo "= striptease"
 for file in release/*
   do
-      strip -s -R .comment -R .gnu.version --strip-unneeded "$file"
+      strip -s -R .comment -R .gnu.version --strip-unneeded "$file" 2>/dev/null
 done
 
 if [[ "$WITH_UPX" == 1 && -x "$(which upx 2>/dev/null)" ]]
@@ -93,7 +93,7 @@ if [[ "$WITH_UPX" == 1 && -x "$(which upx 2>/dev/null)" ]]
         echo "= upx compressing"
         for file in release/*
           do
-              upx -9 --best "$file"
+              upx -9 --best "$file" 2>/dev/null
         done
 fi
 
