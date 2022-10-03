@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WITH_UPX=1
+# WITH_UPX=1
 
 # coreutils_version="8.28"
 # musl_version="1.1.15"

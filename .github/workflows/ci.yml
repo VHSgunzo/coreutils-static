@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  schedule:
-    - cron:  '0 0 * * 1'
   push:
     branches:
     - action
@@ -11,6 +9,7 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,8 +22,10 @@ jobs:
           #  archlinuxcn=https://geo-mirror.chaotic.cx/$repo/$arch
           #before: "sudo pacman -S --noconfirm archlinux-keyring chaotic-keyring chaotic-mirrorlist"
           # packages: >
+          #   base-devel
           #   coreutils
           #   curl
+          #   upx
           scripts: "./build.sh"
       - name: Release
         uses: softprops/action-gh-release@v1
