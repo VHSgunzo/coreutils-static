@@ -1,6 +1,9 @@
 #!/bin/bash
 
+export MAKEFLAGS="-j$(nproc)"
+
 # WITH_UPX=1
+# NO_SYS_MUSL=1
 
 # coreutils_version="8.28"
 # musl_version="1.1.15"
@@ -45,24 +48,28 @@ tar -xJf coreutils-${coreutils_version}.tar.xz
 
 if [ "$platform" == "Linux" ]
     then
-        echo "= downloading musl v${musl_version}"
-        curl -LO https://www.musl-libc.org/releases/musl-${musl_version}.tar.gz
-
-        echo "= extracting musl"
-        tar -xf musl-${musl_version}.tar.gz
-
-        echo "= building musl"
-        working_dir="$(pwd)"
-
-        install_dir="${working_dir}/musl-install"
-
-        pushd musl-${musl_version}
-        env CFLAGS="$CFLAGS -Os -ffunction-sections -fdata-sections" LDFLAGS='-Wl,--gc-sections' ./configure --prefix="${install_dir}"
-        make install
-        popd # musl-${musl-version}
-
         echo "= setting CC to musl-gcc"
-        export CC="${working_dir}/musl-install/bin/musl-gcc"
+        if [[ ! -x "$(which musl-gcc 2>/dev/null)" || "$NO_SYS_MUSL" == 1 ]]
+            then
+                echo "= downloading musl v${musl_version}"
+                curl -LO https://www.musl-libc.org/releases/musl-${musl_version}.tar.gz
+
+                echo "= extracting musl"
+                tar -xf musl-${musl_version}.tar.gz
+
+                echo "= building musl"
+                working_dir="$(pwd)"
+
+                install_dir="${working_dir}/musl-install"
+
+                pushd musl-${musl_version}
+                env CFLAGS="$CFLAGS -Os -ffunction-sections -fdata-sections" LDFLAGS='-Wl,--gc-sections' ./configure --prefix="${install_dir}"
+                make install
+                popd # musl-${musl-version}
+                export CC="${working_dir}/musl-install/bin/musl-gcc"
+            else
+                export CC="$(which musl-gcc 2>/dev/null)"
+        fi
         export CFLAGS="-static"
     else
         echo "= WARNING: your platform does not support static binaries."

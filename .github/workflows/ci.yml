@@ -25,6 +25,7 @@ jobs:
           #   coreutils
           #   curl
           #   upx
+          #   musl
           scripts: "./build.sh"
       - name: Release
         uses: softprops/action-gh-release@v1
