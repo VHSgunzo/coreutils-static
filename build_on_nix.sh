@@ -84,11 +84,31 @@ popd >/dev/null 2>&1
 
 ##-------------------------------------------------------#
 ##Build
-pushd "$($TMPDIRS)" >/dev/null 2>&1
-git clone --filter="blob:none" "https://github.com/VHSgunzo/coreutils-static" && cd "./coreutils-static"
 #https://github.com/VHSgunzo/coreutils-static/blob/main/build.sh
-WITH_UPX="0" source "./build.sh"
-PKG_VERSION="${coreutils_version}" && export PKG_VERSION="${PKG_VERSION}"
+#Musl
+pushd "$($TMPDIRS)" >/dev/null 2>&1 && git clone --filter "blob:none" "https://git.musl-libc.org/git/musl" && cd "./musl"
+unset AR CC CFLAGS CXX CPPFLAGS CXXFLAGS DLLTOOL HOST_CC HOST_CXX LDFLAGS OBJCOPY RANLIB
+make dest clean 2>/dev/null ; make clean 2>/dev/null
+bash "./configure" --prefix="/usr/local/musl"
+sudo make --jobs="$(($(nproc)+1))" --keep-going install ; popd >/dev/null 2>&1
+sudo ldconfig && sudo ldconfig -p
+#Coreutils
+pushd "$($TMPDIRS)" >/dev/null 2>&1
+curl -qfsSLJO "https://ftp.gnu.org/gnu/coreutils/$(curl -qfsSL "https://ftp.gnu.org/gnu/coreutils/" | grep -oP "(?<=href=\")[^\"]+\.tar\.xz(?=\")" | sort -V | tail -n 1)"
+find "./" -type f -iname "*tar.xz" -exec tar -xvf {} \; && find "./" -type f -iname "*tar.xz" -exec rm -rf {} \;
+cd $(find . -maxdepth 1 -type d | grep -v "^.$")
+export CC="$(which musl-gcc 2>/dev/null)"
+export CFLAGS="-O2 -flto=auto -static -w -pipe ${CFLAGS}"
+export CXXFLAGS="${CFLAGS}"
+export CPPFLAGS="${CFLAGS}"
+export LDFLAGS="-static -s -Wl,-S -Wl,--build-id=none ${LDFLAGS}"
+export FORCE_UNSAFE_CONFIGURE="1"
+ulimit -n unlimited 2>/dev/null
+make dist clean 2>/dev/null ; make clean 2>/dev/null
+env FORCE_UNSAFE_CONFIGURE=1 CFLAGS="${CFLAGS} -Os -ffunction-sections -fdata-sections" LDFLAGS="-static -s -Wl,-S -Wl,--build-id=none -Wl,--gc-sections" "./configure" --disable-shared --enable-static
+make --jobs="$(($(nproc)+1))" --keep-going
+find "./src" -maxdepth 1 -type f -exec file -i "{}" \; | grep "application/.*executable" | cut -d":" -f1 | xargs realpath | xargs -I {} rsync -av --copy-links {} "${ARTIFACTS}/"
+PKG_VERSION="$(${ARTIFACTS}/whoami --version | grep -oP '\d+(\.\d+)+' | head -n 1)" && export PKG_VERSION="${PKG_VERSION}"
 find . -type f -name '*.xz' -exec tar -xf {} \;
 find . -type d -name '*release*' ! -name '*.xz' -exec rsync -av --copy-links "{}/." "${ARTIFACTS}" \;
 sudo chown -R "$(whoami):$(whoami)" "${ARTIFACTS}" && chmod -R 755 "${ARTIFACTS}"
