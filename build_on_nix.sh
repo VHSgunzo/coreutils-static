@@ -84,6 +84,16 @@ popd >/dev/null 2>&1
 
 ##-------------------------------------------------------#
 ##Build
+#Deps
+sudo apt-get update -y -qq
+sudo apt-get install autoconf automake autopoint binutils bison build-essential byacc ca-certificates ccache clang diffutils dos2unix gawk flex file imagemagick jq liblz-dev librust-lzma-sys-dev libsqlite3-dev libtool libtool-bin lzip lzma lzma-dev make musl musl-dev musl-tools p7zip-full patch patchelf pkg-config qemu-user-static rsync scons sqlite3 sqlite3-pcre sqlite3-tools texinfo wget -y -qq 2>/dev/null
+#Re
+sudo apt-get install autoconf automake autopoint binutils bison build-essential byacc ca-certificates ccache clang diffutils dos2unix gawk flex file imagemagick jq liblz-dev librust-lzma-sys-dev libsqlite3-dev libtool libtool-bin lzip lzma lzma-dev make musl musl-dev musl-tools p7zip-full patch patchelf pkg-config qemu-user-static rsync scons sqlite3 sqlite3-pcre sqlite3-tools texinfo wget -y -qq 2>/dev/null
+sudo apt install python3-pip python3-venv -y -qq 2>/dev/null
+pip install --break-system-packages --upgrade pip || pip install --upgrade pip
+sudo apt install lm-sensors pciutils procps python3-distro python3-netifaces sysfsutils virt-what -y -qq 2>/dev/null
+pip install build ansi2txt cffi pipx scons scuba py2static pytest typer --upgrade --force 2>/dev/null 
+pip install build ansi2txt cffi pipx scons scuba py2static pytest typer --break-system-packages --upgrade --force 2>/dev/null
 #https://github.com/VHSgunzo/coreutils-static/blob/main/build.sh
 #Musl
 pushd "$($TMPDIRS)" >/dev/null 2>&1 && git clone --filter "blob:none" "https://git.musl-libc.org/git/musl" && cd "./musl"
