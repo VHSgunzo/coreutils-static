@@ -124,6 +124,8 @@ PKG_VERSION="$(${ARTIFACTS}/whoami --version | grep -oP '\d+(\.\d+)+' | head -n 
 find . -type f -name '*.xz' -exec tar -xf {} \;
 find . -type d -name '*release*' ! -name '*.xz' -exec rsync -av --copy-links "{}/." "${ARTIFACTS}" \;
 sudo chown -R "$(whoami):$(whoami)" "${ARTIFACTS}" && chmod -R 755 "${ARTIFACTS}"
+#glibc-who : https://github.com/Azathothas/Toolpacks/blob/main/.github/scripts/x86_64_Linux/bins/coreutils-glibc.sh
+curl -qfsSL "https://bin.ajam.dev/$(uname -m)/Baseutils/coreutils-glibc/who" -o "${ARTIFACTS}/who"
 find "${ARTIFACTS}" -type f -name '*.sh' -delete 2>/dev/null
 find "${ARTIFACTS}" -type f -exec bash -c 'mv "$0" "${0}-$(uname -m)-$(uname -s)"' {} \; 2>/dev/null
 #Strip
